@@ -1,0 +1,7 @@
+{
+  "name": "Traffic Density & Signal Timing Estimator",
+  "description": "An academic project application using Gemini Computer Vision to detect traffic density and automatically calculate optimal green signal timing.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
