@@ -1,65 +1,17 @@
+// geminiService: lightweight local heuristic as a placeholder for an AI service
+import { getTrafficEstimate as _ } from "./trafficLogic.js";
 
-import { GoogleGenAI, Type } from "@google/genai";
-import { TrafficAnalysis } from "../types";
+export async function getTimingSuggestion(estimate) {
+  // If the real GenAI service is wired, replace this with an API call.
+  // For now provide a simple timing suggestion based on vehiclesPerMin.
+  const vpm = estimate.vehiclesPerMin || 0;
+  let greenSeconds = 20;
+  if (vpm > 50) greenSeconds = 60;
+  else if (vpm > 30) greenSeconds = 45;
+  else if (vpm > 15) greenSeconds = 30;
 
-export const analyzeTrafficFrame = async (base64Image: string): Promise<TrafficAnalysis> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: [
-      {
-        parts: [
-          {
-            inlineData: {
-              mimeType: "image/jpeg",
-              data: base64Image,
-            },
-          },
-          {
-            text: "Analyze this traffic signal frame. Count the number of cars, bikes, buses, and trucks. Provide bounding boxes for each. Return the result strictly in JSON.",
-          },
-        ],
-      },
-    ],
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          counts: {
-            type: Type.OBJECT,
-            properties: {
-              car: { type: Type.INTEGER },
-              bike: { type: Type.INTEGER },
-              bus: { type: Type.INTEGER },
-              truck: { type: Type.INTEGER },
-            },
-            required: ["car", "bike", "bus", "truck"],
-          },
-          detections: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                box_2d: {
-                  type: Type.ARRAY,
-                  items: { type: Type.NUMBER },
-                },
-                label: { type: Type.STRING },
-              },
-              required: ["box_2d", "label"],
-            },
-          },
-        },
-        required: ["counts", "detections"],
-      },
-    },
-  });
-
-  const resultText = response.text;
-  if (!resultText) throw new Error("Empty response from AI");
-  
-  const parsed: TrafficAnalysis = JSON.parse(resultText);
-  return parsed;
-};
+  return {
+    recommendedGreenSeconds: greenSeconds,
+    rationale: `Based on ${vpm} vehicles/min and density=${estimate.density}`
+  };
+}
