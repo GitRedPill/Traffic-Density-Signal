@@ -1,0 +1,1 @@
+{\n  "name": "traffic-density-signal",\n  "version": "1.0.0",\n  "scripts": {\n    "build": "esbuild src/index.tsx --bundle --outdir=docs/"\n  },\n  "devDependencies": {\n    "esbuild": "^0.14.0"\n  }\n}
